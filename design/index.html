@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css"/>
+    <script type="text/javascript" src="custom-question.js"></script>
+    <script type="text/javascript" src="design-page-components.js"></script>
+</head>
+<body>
+<div id="customSettings">
+    <div class="comd-alert comd-alert--info">
+        <div class="comd-alert__text" id="testID">
+            This question type allows respondents to evaluate media (video or audio) while it is broadcasted.<br />
+            Note that the character limit property cannot be used.
+        </div>
+    </div>
+    <div class="node-properties-key-fields comd-panel mediaOptions">
+        <header class="node-properties__header co-flex co-flex--justify-between co-flex--center">
+            <div class="node-properties__toggle co-flex co-flex--center">
+                <h4 class="co-text-size-normal">Media options</h4>
+                <div class="sd-tooltip-help"
+                     data-tooltip-text="The main options for the question."></div>
+            </div>
+            <div class="co-flex co-flex--center">
+                <button class="collapse-button comd-icon-button comd-panel__toggle--icon-button"></button>
+            </div>
+        </header>
+        <div class="comd-panel__collapse-area">
+            <div class="node-properties">
+                <div class="node-property-container">
+                    <div class="node-property node-property--mediasource">
+                        <label class="node-property__label" for="mediaSrc">Source (link)
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The path to the media. Required property."></div>
+                        </label>
+                        <input type="text" id="mediaSrc" class="form-input" required="required"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--mediaposter">
+                        <label class="node-property__label" for="mediaPoster">Poster (link)
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The path to the image which shows before the media starts to play."></div></label>
+                        <input type="text" class="form-input" id="mediaPoster"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--mediawidth">
+                        <label class="node-property__label" for="mediaWidth">Width (px)
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The width of the media container in pixels. 640 by default. The width of the container must be between 300 and 900 pixels."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" name="mediaWidth" id="mediaWidth" value=""/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="node-properties-key-fields comd-panel comd-panel--collapsed sliderOptions">
+        <header class="node-properties__header co-flex co-flex--justify-between co-flex--center">
+            <div class="node-properties__toggle co-flex co-flex--center">
+                <h4 class="co-text-size-normal">Slider options</h4>
+                <div class="sd-tooltip-help"
+                     data-tooltip-text="Settings for the question's slider."></div>
+            </div>
+            <div class="co-flex co-flex--center">
+                <button class="collapse-button comd-icon-button comd-panel__toggle--icon-button"></button>
+            </div>
+        </header>
+        <div class="comd-panel__collapse-area">
+            <div class="node-properties">
+                <div class="node-property-container">
+                    <div class="node-property node-property--sliderposition">
+                        <label class="node-property__label" for="sliderPosition">Position
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The position of the slider relative to the media container. Below by default."></div>
+                        </label>
+                        <select id="sliderPosition" class="form-input"/>
+                        <option value="bottom">Below</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                        </select>
+                    </div>
+                </div>		
+								<div class="node-property-container">
+										<div class="node-property node-property--slider-direction">
+											<label class="node-property__label" for="sliderDirection">Direction
+												<div class="sd-tooltip-help" data-tooltip-text="The direction of the slider. Vertical by default."></div>
+											</label>
+											<select id="sliderDirection" class="form-input">
+												<option value="vertical">Vertical</option>
+												<option value="horizontal">Horizontal</option>
+											</select>
+										</div>
+								</div>
+								<div class="node-property-container">
+                    <div class="node-property node-property--sliderwidth">
+                        <label class="node-property__label" for="sliderWidth">Width (px)
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The width of the slider container in pixels. 740 by default. The width of the container must be between 300 and 900 pixels."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" name="sliderWidth" id="sliderWidth" value=""/>
+                    </div>
+                </div>
+            </div>
+            <div class="node-properties" id="scaleSettings">
+                <div class="node-property-container">
+                    <div class="node-property node-property--slidermin">
+                        <label class="node-property__label" for="scaleMin">Minimum
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Specify the minimum value for the slider, -50 by default. The value must be between -100 and 99."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMin" value=""/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--slidermax">
+                        <label class="node-property__label" for="scaleMax">Maximum
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Specify the maximum value for the slider, 50 by default. The value must be between -99 and 100."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMax"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--sliderstart">
+                        <label class="node-property__label" for="scaleStart">Start point
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Specify the slider value for the moment the media starts to play, 0 by default."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleStart"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="node-properties-key-fields comd-panel comd-panel--collapsed moreOptions">
+        <header class="node-properties__header co-flex co-flex--justify-between co-flex--center">
+            <div class="node-properties__toggle co-flex co-flex--center">
+                <h4 class="co-text-size-normal">More options</h4>
+                <div class="sd-tooltip-help"
+                     data-tooltip-text="Additional options for the question."></div>
+            </div>
+            <div class="co-flex co-flex--center">
+                <button class="collapse-button comd-icon-button comd-panel__toggle--icon-button"></button>
+            </div>
+        </header>
+        <div class="comd-panel__collapse-area">
+            <div class="node-properties">
+                <h3>Play button</h3>
+            </div>
+            <div class="node-properties">
+                <div class="node-property-container">
+                    <div class="node-property node-property--playbuttoncolor">
+                        <label class="node-property__label" for="playButtonColor">Color
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Background color of the play button, black by default."></div>
+                        </label>
+                        <input type="color" class="form-input" id="playButtonColor" value=""/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--playbuttontext">
+                        <label class="node-property__label" for="playButtonText">Text
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Text within the Play button, &lsquo;Play&lsquo; by default. The text cannot have more than 35 characters."></div>
+                        </label>
+                        <input type="text" class="form-input" id="playButtonText" value=""/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--countdown">
+                        <label class="node-property__label" for="countdown">Countdown
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The time delay before the media starts to play, 3 seconds by default. The value must be positive and no more than 15 seconds."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="countdown" value=""/>
+                        <span>sec</span>
+                    </div>
+                </div>
+            </div>
+            <div class="node-properties">
+                <h3>User inactivity</h3>
+            </div>
+            <div class="node-properties">
+                <div class="node-property-container">
+                    <div class="node-property node-property--warningsamount">
+                        <label class="node-property__label" for="warningsAmount">Checks
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Number of time the user will be notified that they have not moved the slider after the media has started to play, once by default. The value must be between 0 and 10."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="warningsAmount"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--timecheck">
+                        <label class="node-property__label" for="timeCheck">Time
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Set the time limit for inactivity after the media starts to play, after which the user is notified that they should start the evaluation, 5 seconds by default. The value must be positive."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="timeCheck"/>
+                        <span>sec</span>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--resetbtntext">
+                        <label class="node-property__label" for="resetBtnText">Reset button text
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Text within the Reset button, &lsquo;Reset&lsquo; by default."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--10ch" id="resetBtnText"/>
+                    </div>
+                </div>
+            </div>
+            <div class="node-properties">
+                <div class="node-property-container node-property-container--full-width">
+                    <div class="node-property node-property--warningreset">
+                        <label class="node-property__label" for="warningReset">Warning text
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The text to be presented to the user if they are inactive longer than the specified time. The default is: You don't seem to have moved your slider. Please click &lsquo;Reset&lsquo; to restart."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--full-width" id="warningReset"/>
+                    </div>
+                </div>
+            </div>
+            <div class="node-properties">
+                <h3>Other warnings</h3>
+            </div>
+            <div class="node-properties">
+                <div class="node-property-container node-property-container--full-width">
+                    <div class="node-property node-property--warningios">
+                        <label class="node-property__label" for="warningIOS">Notification for iOS devices
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="The text to be presented to the user if they use device with iOS. The default is: Media is loading and will start shortly."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--full-width" id="warningIOS"/>
+                    </div>
+                    <br />
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="comd-tooltip comd-tooltip--right" id="tooltipBox">
+    <div class="comd-tooltip__arrow"></div>
+    <div class="comd-tooltip__inner"></div>
+</div>
+<script src="index.js"></script>
+</body>
+</html>
