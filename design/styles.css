@@ -414,6 +414,7 @@ input[type="color"] {
     padding: 5px;
     position: absolute;
     display: none;
+    z-index: 10;
 }
 .comd-tooltip--right {
     padding: 0 5px;
@@ -455,6 +456,14 @@ input[type="color"] {
 }
 .comd-tooltip--error .comd-tooltip__inner {
     background-color: #eb0052;
+}
+.comd-tooltip--warning .comd-tooltip--bottom,
+.comd-tooltip--warning .comd-tooltip__arrow {
+    border-bottom-color: #ff986e;
+}
+
+.comd-tooltip--warning .comd-tooltip__inner {
+    background-color: #ff986e;
 }
 /* tooltip end */
 
@@ -859,4 +868,17 @@ input[type=radio].form-input--error + label .icon-radio::before {
 input[type=checkbox].form-input--error + label .icon-checkbox::before {
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ff6c9f !important;
     background-color: rgb(235 0 82 / 30%) !important;
+}
+.form-input--warning {
+    border-color: #ff986e !important;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ffa480 !important;
+}
+input[type=radio].form-input--warning + label .icon-radio::before {
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0px 0px 8px #ffa480 !important;
+    background-color: rgb(255 152 110) !important;
+    border-radius: 8px;
+}
+input[type=checkbox].form-input--warning + label .icon-checkbox::before {
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ffa480 !important;
+    background-color: rgb(255 152 110 / 30%) !important;
 }

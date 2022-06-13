@@ -1,8 +1,8 @@
 {
   "id": "2658c838-ae18-451b-a328-7e41d6190e49",
   "schemaVersion": 2,
-  "name": "Media Rating + Slider",
-  "description": "",
+  "name": "Media Rating (DEV)",
+  "description": "Development version - Media (video or audio) rating while it broadcast.",
   "baseQuestionType": "OpenForm",
   "disableDefaultRendering": true,
   "iconUrl": "design/icon-dev.svg",
@@ -12,9 +12,9 @@
     "deps": {
       "scripts": [],
       "styles": [
-        "/runtime/jquery-ui.min.css",
         "/runtime/video-js.min.css",
-        "/runtime/styles.css"
+        "/runtime/styles.css",
+        "/lib/slider/styles.css"
       ]
     }
   }
