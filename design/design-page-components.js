@@ -5,37 +5,55 @@ function errorTooltipShow(element, error) {
         left: element.offsetLeft,
         top: element.offsetTop
     };
-    let numericAddition = '';
-    if(text == 'Must be numeric') {
-        numericAddition = 'numeric--'
-    }
-    if(document.querySelectorAll("#error--" + numericAddition + element.id).length == 0){
+    if(document.querySelectorAll("#error--" + element.id).length === 0){
         let ttErrorBox = document.createElement("div");
         ttErrorBox.classList.add("comd-tooltip");
         ttErrorBox.classList.add("comd-tooltip--bottom");
         ttErrorBox.classList.add("comd-tooltip--error");
-        if(text == 'Must be numeric') {
-            ttErrorBox.id = "error--numeric--" + element.id;
-        } else {
-            ttErrorBox.id = "error--" + element.id;
-        }
+        ttErrorBox.id = "error--" + element.id;
         ttErrorBox.innerHTML = '<div class="comd-tooltip__arrow"></div><div class="comd-tooltip__inner"></div>';
-        document.body.appendChild(ttErrorBox);
+        element.insertAdjacentElement('afterend', ttErrorBox);
         ttErrorBox.style.display = "block";
         ttErrorBox.getElementsByClassName("comd-tooltip__inner")[0].innerHTML = text;
-        let arrPosition = ttErrorBox.offsetWidth/2 - 5 + "px";
-        ttErrorBox.querySelectorAll(".comd-tooltip__arrow")[0].style.left = arrPosition;
-        ttErrorBox.style.top = position.top + ttErrorBox.offsetHeight/2 + 7 + "px";
+        ttErrorBox.querySelectorAll(".comd-tooltip__arrow")[0].style.left = ttErrorBox.offsetWidth / 2 - 5 + "px";
         ttErrorBox.style.left = position.left - (ttErrorBox.offsetWidth/2 - element.offsetWidth/2) + "px";
     }
 }
 
-function errorTooltipHide(element) {
-    if(document.querySelectorAll("#error--numeric--" + element.id).length > 0) {
-        element.classList.remove('form-input--error');
-        let ttErrorBox = document.getElementById("error--numeric--" + element.id);
-        ttErrorBox.outerHTML = "";
+/* tooltip with warning */
+function warningTooltipShow(element, message) {
+    let position = {
+        left: element.offsetLeft,
+        top: element.offsetTop
+    };
+
+    if(document.querySelectorAll('#warning--' + element.id).length === 0) {
+        let ttWarningBox = document.createElement('div');
+        ttWarningBox.id = 'warning--' + element.id;
+        ttWarningBox.classList.add('comd-tooltip');
+        ttWarningBox.classList.add('comd-tooltip--bottom');
+        ttWarningBox.classList.add('comd-tooltip--warning');
+
+        ttWarningBox.innerHTML = '<div class="comd-tooltip__arrow"></div><div class="comd-tooltip__inner"></div>';
+        document.body.appendChild(ttWarningBox);
+        ttWarningBox.style.display = 'block';
+        ttWarningBox.getElementsByClassName('comd-tooltip__inner')[0].innerHTML = message;
+        ttWarningBox.querySelectorAll('.comd-tooltip__arrow')[0].style.left = ttWarningBox.offsetWidth / 2 - 5 + 'px';
+        ttWarningBox.style.top = position.top + ttWarningBox.offsetHeight/2 + 7 + 'px';
+        ttWarningBox.style.left = position.left - (ttWarningBox.offsetWidth/2 - element.offsetWidth/2) + 'px';
     }
+}
+
+//TODO: refactoring: use this function instead of specifying the panel manually during error element creation (?)
+function getPanelWithElement(elementId) {
+    let panels = document.querySelectorAll('.comd-panel');
+    let panelWithElement = null;
+    panels.forEach(panel => {
+        if(!!panel.querySelector('#' + elementId)) {
+            panelWithElement = panel;
+        }
+    });
+    return panelWithElement;
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -97,32 +115,4 @@ document.addEventListener('DOMContentLoaded', function(){
             el.getElementsByClassName("collapse-button")[0].style.transform = "rotateZ(0deg)";
         }
     }
-
-    /* check numerics */
-    function checkIfNumeric(input) {
-        if(!!input.value) {
-            let realVal = input.value;
-            let parsedVal = parseInt(realVal);
-            if(!isNaN(parsedVal) && realVal !== parsedVal) {
-                input.value = parsedVal;
-            }
-            let result = !isNaN(input.value);
-            if(!result) {
-                input.classList.add('form-input--error');
-                let errorText = 'Must be numeric';
-                errorTooltipShow(input, errorText);
-            } else {
-                errorTooltipHide(input);
-            }
-        } else {
-            errorTooltipHide(input);
-        }
-    }
-
-    let numerics = document.querySelectorAll('.checkIfNumeric');
-    numerics.forEach(function(numeric) {
-        numeric.addEventListener('input', function () {
-            checkIfNumeric(this);
-        });
-    });
 });

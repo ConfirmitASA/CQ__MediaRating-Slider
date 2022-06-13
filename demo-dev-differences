@@ -1,0 +1,12 @@
+demo
+id: 6f41ab25-214d-4c98-a06f-60b6ca31b466
+name: Media Rating
+description: Ready for release - Media (video or audio) rating while it broadcast.
+icon: icon.svg
+
+dev
+id: 2658c838-ae18-451b-a328-7e41d6190e49
+name: Media Rating (DEV)
+description: Development version - Media (video or audio) rating while it broadcast.
+icon: icon-dev.svg
+

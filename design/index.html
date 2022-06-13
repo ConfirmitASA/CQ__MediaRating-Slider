@@ -49,7 +49,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="The width of the media container in pixels. 640 by default. The width of the container must be between 300 and 900 pixels."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" name="mediaWidth" id="mediaWidth" value=""/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" name="mediaWidth" id="mediaWidth" value="640" min="300" max="900"/>
                     </div>
                 </div>
             </div>
@@ -80,26 +80,6 @@
                         <option value="right">Right</option>
                         </select>
                     </div>
-                </div>		
-								<div class="node-property-container">
-										<div class="node-property node-property--slider-direction">
-											<label class="node-property__label" for="sliderDirection">Direction
-												<div class="sd-tooltip-help" data-tooltip-text="The direction of the slider. Vertical by default."></div>
-											</label>
-											<select id="sliderDirection" class="form-input">
-												<option value="vertical">Vertical</option>
-												<option value="horizontal">Horizontal</option>
-											</select>
-										</div>
-								</div>
-								<div class="node-property-container">
-                    <div class="node-property node-property--sliderwidth">
-                        <label class="node-property__label" for="sliderWidth">Width (px)
-                            <div class="sd-tooltip-help"
-                                 data-tooltip-text="The width of the slider container in pixels. 740 by default. The width of the container must be between 300 and 900 pixels."></div>
-                        </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" name="sliderWidth" id="sliderWidth" value=""/>
-                    </div>
                 </div>
             </div>
             <div class="node-properties" id="scaleSettings">
@@ -109,7 +89,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Specify the minimum value for the slider, -50 by default. The value must be between -100 and 99."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMin" value=""/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMin" value="-50" min="-100" max="99" step="1"/>
                     </div>
                 </div>
                 <div class="node-property-container">
@@ -118,16 +98,25 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Specify the maximum value for the slider, 50 by default. The value must be between -99 and 100."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMax"/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleMax" value="50" min="-99" max="100" step="1"/>
                     </div>
                 </div>
                 <div class="node-property-container">
                     <div class="node-property node-property--sliderstart">
-                        <label class="node-property__label" for="scaleStart">Start point
+                        <label class="node-property__label" for="scaleStart">Start position
                             <div class="sd-tooltip-help"
-                                 data-tooltip-text="Specify the slider value for the moment the media starts to play, 0 by default."></div>
+                                 data-tooltip-text="Specify the slider value for the moment the media starts to play. Leave blank for 'no value' position."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleStart"/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleStart" step="1"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--sliderstep">
+                        <label class="node-property__label" for="scaleStep">Step
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Specify the step value for the slider, 10 by default."></div>
+                        </label>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="scaleStep" value="10" min="1" step="1"/>
                     </div>
                 </div>
             </div>
@@ -155,7 +144,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Background color of the play button, black by default."></div>
                         </label>
-                        <input type="color" class="form-input" id="playButtonColor" value=""/>
+                        <input type="color" class="form-input" id="playButtonColor" value="#000000"/>
                     </div>
                 </div>
                 <div class="node-property-container">
@@ -164,7 +153,16 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Text within the Play button, &lsquo;Play&lsquo; by default. The text cannot have more than 35 characters."></div>
                         </label>
-                        <input type="text" class="form-input" id="playButtonText" value=""/>
+                        <input type="text" class="form-input" id="playButtonText" value="Play"/>
+                    </div>
+                </div>
+                <div class="node-property-container">
+                    <div class="node-property node-property--playbuttontextcolor">
+                        <label class="node-property__label" for="playButtonTextColor">Text color
+                            <div class="sd-tooltip-help"
+                                 data-tooltip-text="Font color of the play button, white by default."></div>
+                        </label>
+                        <input type="color" class="form-input" id="playButtonTextColor" value="#ffffff"/>
                     </div>
                 </div>
                 <div class="node-property-container">
@@ -173,7 +171,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="The time delay before the media starts to play, 3 seconds by default. The value must be positive and no more than 15 seconds."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="countdown" value=""/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="countdown" value="3" min="0" max="15"/>
                         <span>sec</span>
                     </div>
                 </div>
@@ -188,7 +186,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Number of time the user will be notified that they have not moved the slider after the media has started to play, once by default. The value must be between 0 and 10."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="warningsAmount"/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="warningsAmount" value="1" min="0" max="10"/>
                     </div>
                 </div>
                 <div class="node-property-container">
@@ -197,7 +195,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Set the time limit for inactivity after the media starts to play, after which the user is notified that they should start the evaluation, 5 seconds by default. The value must be positive."></div>
                         </label>
-                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="timeCheck"/>
+                        <input type="text" class="form-input form-input--3ch checkIfNumeric" id="timeCheck" value="5" min="0"/>
                         <span>sec</span>
                     </div>
                 </div>
@@ -207,7 +205,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="Text within the Reset button, &lsquo;Reset&lsquo; by default."></div>
                         </label>
-                        <input type="text" class="form-input form-input--10ch" id="resetBtnText"/>
+                        <input type="text" class="form-input form-input--10ch" id="resetBtnText" value="Reset"/>
                     </div>
                 </div>
             </div>
@@ -218,7 +216,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="The text to be presented to the user if they are inactive longer than the specified time. The default is: You don't seem to have moved your slider. Please click &lsquo;Reset&lsquo; to restart."></div>
                         </label>
-                        <input type="text" class="form-input form-input--full-width" id="warningReset"/>
+                        <input type="text" class="form-input form-input--full-width" id="warningReset" value="You don't seem to have moved your slider. Please click &lsquo;Reset&lsquo; to restart."/>
                     </div>
                 </div>
             </div>
@@ -232,7 +230,7 @@
                             <div class="sd-tooltip-help"
                                  data-tooltip-text="The text to be presented to the user if they use device with iOS. The default is: Media is loading and will start shortly."></div>
                         </label>
-                        <input type="text" class="form-input form-input--full-width" id="warningIOS"/>
+                        <input type="text" class="form-input form-input--full-width" id="warningIOS" value="Media is loading and will start shortly."/>
                     </div>
                     <br />
                     <br />
