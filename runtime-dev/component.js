@@ -1,27 +1,52 @@
-import $ from 'jquery';
-import "jquery-ui/ui/widget";
-import "jquery-ui/ui/widgets/mouse";
-import "jquery-ui/ui/widgets/slider";
-import SliderOpenQuestionView from "../lib/slider/slider-open-question-view";
-
-window.jQuery = $;
-require("jquery-ui-touch-punch");
+import SliderOpenComponent from "../lib/slider/slider-open-component.js";
+import {SLIDER_DIRECTION} from "../lib/slider/constants";
 import videojs from "video.js";
+import {DEFAULT_SLIDER_SETTINGS} from "../lib/slider/slider-default-settings";
 
 class MediaRatingQuestion {
 	constructor(currentQuestion, mediaOptions, questionSettings) {
 		this.question = currentQuestion;
-		this.options = mediaOptions;
+		this.options = mediaOptions ?? {};
 		this.questionSettings = questionSettings;
 		this.checks = 0;
 		this.sliderMoved = false;
 		// not in use yet; for future adaptation of the question depending on the screen orientation
 		//this.screenOrientation = this.getOrientation();
-		this.primaryBackground = $(".cf-navigation-next").css("background-color");
+		this.primaryBackground = getComputedStyle(document.querySelector(".cf-navigation-next")).getPropertyValue("background-color");
+		this.questionElement = document.querySelector('#' + this.question.id);
 		this.videoDuration = 0;
 		this.currentLanguage = String(Confirmit.page.surveyInfo.language);
 		this.devErrors = [];
+		this.handleNoValueOffset = 48;
 		this.init();
+	}
+
+	get videoSliderContainerNode() {
+		return document.querySelector('#' + this.question.id + ' .video-slider-container');
+	}
+
+	get sliderContainerNode() {
+		return document.querySelector('#' + this.question.id + ' .slider-container');
+	}
+
+	get videoContainerNode() {
+		return document.querySelector('#' + this.question.id + ' .video-container');
+	}
+
+	get buttonStartVideoContainerNode() {
+		return document.querySelector('#' + this.question.id + ' .button-container');
+	}
+
+	get videoNode() {
+		return document.querySelector('#' + this.question.id + '-rate-video');
+	}
+
+	get timingContainerNode() {
+		return  document.querySelector('#' + this.question.id + ' .videoTiming');
+	}
+
+	get timingContainerHeight() {
+		return  !!this.timingContainerNode ? this.timingContainerNode.clientHeight : 24;
 	}
 
 	init() {
@@ -29,10 +54,12 @@ class MediaRatingQuestion {
 		if (this.devErrors.length > 0) {
 			document.getElementById(this.question.id).innerHTML = '<div style="color: red;">' + this.devErrors.join('<br />') + '</div>';
 		} else {
-				//document.getElementById(this.question.id).querySelectorAll('.cf-open-answer')[0].style.display = 'none';
-				this.setDefaultOptions();
-				$('body').prepend('<div id="popup" class="hide"><div id="popup-content"></div></div>');
-				this.renderVideoRatingQuestion();
+			//document.getElementById(this.question.id).querySelectorAll('.cf-open-answer')[0].style.display = 'none';
+			this.ensureBackwardCompatibilityV1();
+			this.setDefaultOptions();
+			this.options.sliderSettings = this.getSliderSettings();
+			document.querySelector('body').insertAdjacentHTML('afterbegin', '<div id="popup" class="hide"><div id="popup-content"></div></div>');
+			this.renderVideoRatingQuestion();
 		}
 	}
 
@@ -43,12 +70,26 @@ class MediaRatingQuestion {
 		return this.devErrors;
 	}
 
+	ensureBackwardCompatibilityV1() {
+		//scaleStep option was added with v2
+		if(!this.options.hasOwnProperty('scaleStep')) {
+			// scaleStart default option used to be = 0 in v1 (now it is 'no value' previously there was no 'no value' option)
+			if(this.options.hasOwnProperty('scaleStart') && this.options.scaleStart === '') {
+				this.options.scaleStart = 0;
+			}
+			// in v1 only min and max labels were shown therefore need to calculate scaleStep value accordingly
+			let minLabelValue = (this.options.hasOwnProperty('scaleMin') && this.options.scaleMin !== '') ? parseInt(this.options.scaleMin) : -50;
+			let maxLabelValue = (this.options.hasOwnProperty('scaleMax') && this.options.scaleMax !== '') ? parseInt(this.options.scaleMax) : 50;
+			this.options.scaleStep = maxLabelValue - minLabelValue;
+		}
+	}
+
 	setDefaultOptions() {
 		if (!this.options.hasOwnProperty("type") || (this.options.hasOwnProperty("type") && this.options.type == "")) {
 			this.options.type = "video";
 		}
-		if (!this.options.hasOwnProperty("videoWidth") || (this.options.hasOwnProperty("videoWidth") && this.options.videoWidth == "")) {
-			this.options.videoWidth = 640;
+		if (!this.options.hasOwnProperty("width") || (this.options.hasOwnProperty("width") && this.options.width == "")) {
+			this.options.width = 640;
 		}
 		if (!this.options.hasOwnProperty("poster") || (this.options.hasOwnProperty("poster") && this.options.poster == "")) {
 			this.options.poster = "";
@@ -56,14 +97,14 @@ class MediaRatingQuestion {
 		if (!this.options.hasOwnProperty("sliderPosition") || (this.options.hasOwnProperty("sliderPosition") && this.options.sliderPosition == "")) {
 			this.options.sliderPosition = "bottom";
 		}
-		if (!this.options.hasOwnProperty("sliderWidth") || (this.options.hasOwnProperty("sliderWidth") && this.options.sliderWidth == "")) {
-			this.options.sliderWidth = 640;
-		}
 		if (!this.options.playButtonText.hasOwnProperty(this.currentLanguage) || (this.options.playButtonText.hasOwnProperty(this.currentLanguage) && this.options.playButtonText[this.currentLanguage] == "")) {
 			this.options.playButtonText[this.currentLanguage] = "Play";
 		}
 		if (!this.options.hasOwnProperty("playButtonColor") || (this.options.hasOwnProperty("playButtonColor") && this.options.playButtonColor == "")) {
 			this.options.playButtonColor = this.primaryBackground;
+		}
+		if (!this.options.hasOwnProperty("playButtonTextColor") || (this.options.hasOwnProperty("playButtonTextColor") && this.options.playButtonTextColor == "")) {
+			this.options.playButtonTextColor = "#ffffff";
 		}
 		if (!this.options.hasOwnProperty("countdown") || (this.options.hasOwnProperty("countdown") && this.options.countdown == "")) {
 			this.options.countdown = 3;
@@ -83,6 +124,32 @@ class MediaRatingQuestion {
 		if (!this.options.warningIOS.hasOwnProperty(this.currentLanguage) || (this.options.warningIOS.hasOwnProperty(this.currentLanguage) && this.options.warningIOS[this.currentLanguage] == "")) {
 			this.options.warningIOS[this.currentLanguage] = "Media is loading and will start shortly.";
 		}
+		if (!this.options.hasOwnProperty("scaleMin") || (this.options.hasOwnProperty("scaleMin") && this.options.scaleMin === "")) {
+			this.options.scaleMin = DEFAULT_SLIDER_SETTINGS.customScale.min;
+		}
+		if (!this.options.hasOwnProperty("scaleMax") || (this.options.hasOwnProperty("scaleMax") && this.options.scaleMax === "")) {
+			this.options.scaleMax = DEFAULT_SLIDER_SETTINGS.customScale.max;
+		}
+		if (!this.options.hasOwnProperty("scaleStart") || (this.options.hasOwnProperty("scaleStart") && this.options.scaleStart === "")) {
+			this.options.scaleStart = DEFAULT_SLIDER_SETTINGS.customScale.start;
+		}
+		if (!this.options.hasOwnProperty("scaleStep") || (this.options.hasOwnProperty("scaleStep") && this.options.scaleStep === "")) {
+			this.options.scaleStep = DEFAULT_SLIDER_SETTINGS.customScale.step;
+		}
+	}
+
+	getSliderSettings() {
+		return {
+			direction: '',
+			isQuestionValue: false,
+			isCustomScale: true,
+			customScale: {
+				min: parseInt(this.options.scaleMin),
+				max: parseInt(this.options.scaleMax),
+				start: parseInt(this.options.scaleStart),
+				step: parseInt(this.options.scaleStep)
+			}
+		}
 	}
 
 	renderVideoRatingQuestion() {
@@ -92,11 +159,11 @@ class MediaRatingQuestion {
 			'<div class="cf-question__instruction" id="' + this.question.id + '_instruction">' + this.question.instruction + '</div>' +
 			'<div class="cf-question__error cf-error-block cf-error-block--bottom cf-error-block--hidden" id="' + this.question.id + '_error" role="alert" aria-labelledby="' + this.question.id + '_error_list">' +
 			'<ul class="cf-error-list" id="' + this.question.id + '_error_list"></ul></div>' +
-			'<div class="cf-question__content cf-question__content--no-padding"><div class="video-slider-container"></div></div>';
+			'<div class="cf-question__content cf-question__content--no-padding"></div>';
 		// add specific question markup
 		const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 		if (this.options.sliderPosition == 'left' || this.options.sliderPosition == 'right') {
-			$('#' + this.question.id + ' .cf-question__content').addClass('slider-' + this.options.sliderPosition);
+			document.querySelector('#' + this.question.id + ' .cf-question__content').classList.add('slider-' + this.options.sliderPosition);
 		}
 		let notificationIos = '';
 		if (iOS) {
@@ -122,10 +189,10 @@ class MediaRatingQuestion {
 				console.log('default');
 		}
 
-		$('#' + this.question.id + ' .cf-question__content').prepend('' +
+		document.querySelector('#' + this.question.id + ' .cf-question__content').insertAdjacentHTML('afterbegin', '' +
 			notificationIos +
-			'<div class="video-slider-container"><div class="video-container" style="width: ' + this.options.videoWidth + 'px; max-width: 82%;">' +
-			'<div class="button-container"><button style="background: ' + this.options.playButtonColor + ';" type="button" id="startVideo_' + this.question.id + '" data-start="0">' + this.options.playButtonText[this.currentLanguage] + '</button></div>' +
+			'<div class="video-slider-container"><div class="video-container" style="width: ' + this.options.width + 'px; max-width: 82%;">' +
+			'<div class="button-container"><button style="color: ' + this.options.playButtonTextColor + '; background: ' + this.options.playButtonColor + ';" type="button" id="startVideo_' + this.question.id + '" data-start="0">' + this.options.playButtonText[this.currentLanguage] + '</button></div>' +
 			'</div>' +
 			'<div class="slider-container">' +
 			'</div></div></div>');
@@ -158,48 +225,12 @@ class MediaRatingQuestion {
 		//Changing duration to use a Math.round function
 		function changeCounterDisplay(obj) {
 			let counterMinutes = obj.setCounterMinutesDisplay(Math.floor(myPlayer.duration()));
-			$('#' + obj.question.id + ' .video-container').append('<div class="videoTiming clearfix" style="background: ' + obj.primaryBackground + ';"><span class="videoTimingTitle"><span id="timeRemain">00:00</span>&nbsp;/&nbsp;<span id="videoLength">' + counterMinutes + ' </span></span></div>');
+			document.querySelector('#' + obj.question.id + ' .video-container').insertAdjacentHTML('beforeend', '<div class="videoTiming clearfix" style="background: ' + obj.primaryBackground + ';"><span class="videoTimingTitle"><span id="timeRemain">00:00</span>&nbsp;/&nbsp;<span id="videoLength">' + counterMinutes + ' </span></span></div>');
 			obj.videoDuration = Math.floor(myPlayer.duration());
 			obj.generateSparklines(Math.floor(myPlayer.duration()));
 		};
 
-		//add slider
-		let sliderContainer = document.querySelector('.slider-container');
-		let mySlider = new SliderOpenQuestionView(this.question, this.questionSettings, this.options, sliderContainer);
-		const sliderHeight = ($('.video-container').height() + 100) + 'px';
-
-		let orientation = 'horizontal';
-		if (this.options.sliderPosition == 'left' || this.options.sliderPosition == 'right' || mySlider.sliderSettings.isVertical) {
-			orientation = 'vertical';
-			$('.slider-container').css({ 'height': sliderHeight });
-			$('.cf-question__content').css({ 'height': '100%' });
-			$('.cf-single-slider-question--vertical').css({ 'height': '100%' });
-			$('.cf-single-slider-question--vertical .cf-single-slider-question__label').css({ 'margin': '0' });
-		} else {
-			$('.slider-container').css({ 'width': this.options.sliderWidth + 'px', 'max-width': '100%' });
-		}
-
-		//hide steps if scale is too big
-		let labels = document.querySelectorAll('.cf-single-slider-question__labels li');
-		let hideSteps = [1, 5, 10, 50];
-		
-		for (let i = 0; i < hideSteps.length; i++) {
-			let isOverflow = this.isOverflow(labels, hideSteps[i]);
-			if (isOverflow) {
-				this.hideLabels(labels, hideSteps[i + 1]);
-				
-				document.querySelector('.cf-slider__handle').innerHTML = '<span>' + (mySlider.getSliderValue() ? mySlider.getSliderValue()	: '') + '<span>';
-				mySlider.slider.changeEvent.on(this.onSliderChange.bind(mySlider));
-				
-				if (i == 2 && !mySlider.sliderSettings.isVertical) {
-					$('.cf-single-slider-question__labels').css({ 'margin-left': '2.1em' });
-				}
-			} else {
-					break;
-			}
-		}
-
-		const nextBtn = $('.cf-navigation-next');
+		const nextBtn = document.querySelector('.cf-navigation-next');
 		let nextButtonDisabled = false;
 		let addResetBtn = false;
 
@@ -210,23 +241,121 @@ class MediaRatingQuestion {
 			}
 		}
 		// if(addResetBtn) {
-		//     $('#startVideo').attr('data-start', questionObj.question.value.split("|")[1].split(",").length);
-		//     $('#' + questionObj.question.id + ' .button-container').append('<button type="button" id="restartVideo" style="background: #000000; margin-left: 15px;">Reset</button>');
+		//     document.querySelector('#startVideo').setAttribute('data-start', questionObj.question.value.split("|")[1].split(",").length.toString());
+		//     document.querySelector('#' + questionObj.question.id + ' .button-container').insertAdjacentHTML('beforeend', '<button type="button" id="restartVideo" style="background: #000000; margin-left: 15px;">Reset</button>');
 		// }
-		nextBtn.attr('disabled', nextButtonDisabled);
+		if(nextButtonDisabled) {
+			nextBtn.setAttribute('disabled', nextButtonDisabled.toString());
+		} else {
+			nextBtn.removeAttribute('disabled');
+		}
 		//}
 
 		//countdown
-		$(document).on('click', '#startVideo_' + this.question.id, function () { startVideo(object); });
+		document.querySelector('#startVideo_' + this.question.id).addEventListener('click', function () { startVideo(object); })
 
 		function startVideo(obj) {
-			//myPlayer.currentTime(parseInt($('#startVideo').attr('data-start'), 10))
+			//myPlayer.currentTime(parseInt(document.querySelector('#startVideo').setAttribute('data-start'), '10'))
 			myPlayer.play();
 			myPlayer.pause();
 			mySlider.container.classList.add("disabled");
 			obj.playerCycle(myPlayer, mySlider);
-			$('#startVideo_' + obj.question.id).attr({ 'disabled': true });
+			document.querySelector('#startVideo_' + obj.question.id).setAttribute('disabled', 'true');
 		}
+
+		function setVideoContainerPadding() {
+			const buttonContainer = this.buttonStartVideoContainerNode;
+			let paddingValue = buttonContainer.offsetHeight + parseFloat(window.getComputedStyle(buttonContainer)['marginBottom']);
+			paddingValue += this.timingContainerHeight;
+
+			this.videoContainerNode.style.paddingBottom = paddingValue + 'px';
+		}
+
+		window.addEventListener('load', setVideoContainerPadding.bind(this));
+
+		let mySlider = this.addSlider();
+	}
+
+	addSlider() {
+		let sliderContainer = this.sliderContainerNode;
+
+		if (this.options.sliderPosition === 'left' || this.options.sliderPosition === 'right') {
+			this.options.sliderSettings.direction = SLIDER_DIRECTION.vertical;
+			const videoTop = this.videoNode.getBoundingClientRect().top;
+			const videoSliderContainerTop = this.videoSliderContainerNode.getBoundingClientRect().top;
+			sliderContainer.style.marginTop = videoTop - videoSliderContainerTop - this.handleNoValueOffset + 'px';
+			window.addEventListener('resize', updateSliderHeight.bind(this));
+			window.addEventListener('load', updateSliderHeight.bind(this));
+		}
+		if (this.options.sliderPosition === 'bottom') {
+			this.options.sliderSettings.direction = SLIDER_DIRECTION.horizontal;
+			if(this.question.isRtl) {
+				sliderContainer.style.marginRight = '-' + this.handleNoValueOffset + 'px';
+			} else {
+				sliderContainer.style.marginLeft = '-' + this.handleNoValueOffset + 'px';
+			}
+
+			window.addEventListener('resize', updateSliderWidth.bind(this));
+			window.addEventListener('load', updateSliderWidth.bind(this));
+		}
+
+		function updateSliderHeight() {
+			const sliderElement = document.querySelector('#' + this.question.id + '_slider');
+			const videoHeight = parseFloat(getComputedStyle(this.videoNode).height.replace('px', ''));
+
+			sliderElement.style.height = (videoHeight + this.handleNoValueOffset + this.timingContainerHeight).toString() + 'px';
+		}
+
+		function updateSliderWidth() {
+			const videoSliderContainerWidth = this.videoSliderContainerNode.clientWidth;
+			const sliderElement = document.querySelector('#' + this.question.id + '_slider');
+			const sliderContainer = document.querySelector('#' + this.question.id + ' .slider-container');
+			const videoWidth = parseFloat(getComputedStyle(this.videoNode).width.replace('px', ''));
+
+			let newSliderWidth = videoWidth + this.handleNoValueOffset;
+			if(newSliderWidth + this.handleNoValueOffset > videoSliderContainerWidth) {
+				newSliderWidth = videoSliderContainerWidth;
+				if(this.question.isRtl) {
+					sliderContainer.style.marginRight = '-8px';
+				} else {
+					sliderContainer.style.marginLeft = '-8px';
+				}
+			} else {
+				if(this.question.isRtl) {
+					sliderContainer.style.marginRight = '-' + this.handleNoValueOffset + 'px';
+				} else {
+					sliderContainer.style.marginLeft = '-' + this.handleNoValueOffset + 'px';
+				}
+			}
+			sliderElement.style.width = newSliderWidth.toString() + 'px';
+		}
+
+		let mySlider = new SliderOpenComponent(this.question, this.questionSettings, this.options.sliderSettings, sliderContainer, this.question.id + '_slider');
+
+		let handleInner = document.createElement('span');
+		let handle = document.querySelector('#' + mySlider.sliderId + ' .cf-slider__handle');
+		handle.insertAdjacentElement('afterbegin', handleInner);
+		if(getComputedStyle(handle).getPropertyValue('border-top-width') !== '0px') {
+			handleInner.style.lineHeight = '1.6em';
+		}
+		let handleAfterElementBgColor = getHEXColor(getComputedStyle(handle, ':after').backgroundColor);
+		let handleBgColor = handleAfterElementBgColor.includes('#000000') ? getHEXColor(getComputedStyle(handle).backgroundColor) : handleAfterElementBgColor;
+		handleInner.style.color = handleBgColor.includes('#ffffff') ? '#000000' : '#ffffff';
+
+		function getHEXColor(color) {
+			if(!color.includes('rgb')) return '#00000000'; //IE returns 'transparent' for default value
+			const rgba2hex = (rgba) => `#${rgba.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/).slice(1).map((n, i) => (i === 3 ? Math.round(parseFloat(n) * 255) : parseFloat(n)).toString(16).padStart(2, '0').replace('NaN', '')).join('')}`
+			return  rgba2hex(color);
+		}
+		updateHandleValue(mySlider, handleInner);
+
+		mySlider.changeEvent.on(() => updateHandleValue(mySlider, handleInner));
+
+		function updateHandleValue(slider, handleInner) {
+			handleInner.innerHTML = slider.getSliderValue() ? slider.getSliderValue() : '';
+		}
+
+		return mySlider;
 	}
 
 	adjustHexOpacity(color, opacity) {
@@ -256,12 +385,13 @@ class MediaRatingQuestion {
 	generateSparklines(seconds) {
 		if (this.options.showSparkline == true) {
 			let lines = "";
-			const width = $("#spark").width() / seconds;
-			const pcWidth = (width / $("#spark").width()) * 100;
+			const width = parseFloat(getComputedStyle(this.questionElement.querySelector('#spark')).width.replace("px", ""));
+			const widthPerSecond = width / seconds;
+			const pcWidth = (widthPerSecond / width) * 100;
 			for (let i = 0; i < seconds; i++) {
 				lines += '<span style="width:' + pcWidth + '%;" class="spark-line" id="spark-' + i + '"></span>';
 			}
-			$("#spark").html(lines);
+			this.questionElement.querySelector("#spark").innerHTML = lines;
 		}
 	}
 
@@ -271,8 +401,9 @@ class MediaRatingQuestion {
 		let startTimer = setInterval(function () {
 			if (timeleft <= 0) {
 				clearInterval(startTimer);
-				$('#startVideo_' + object.question.id).html(object.options.playButtonText[object.currentLanguage]);
+				document.querySelector('#startVideo_' + object.question.id).innerHTML = object.options.playButtonText[object.currentLanguage];
 				sliderObj.container.classList.remove("disabled");
+				sliderObj.setSliderValue(object.options.sliderSettings.customScale.start); //'null'
 				player.play();
 				var videoLength = Math.round(player.duration());
 				object.collectData(player, videoLength, sliderObj);
@@ -281,9 +412,9 @@ class MediaRatingQuestion {
 				}
 			}
 			if (timeleft === 0) {
-				$('#startVideo_' + object.question.id).html(object.options.playButtonText[object.currentLanguage]);
+				document.querySelector('#startVideo_' + object.question.id).innerHTML = object.options.playButtonText[object.currentLanguage];
 			} else {
-				$('#startVideo_' + object.question.id).text(timeleft);
+				document.querySelector('#startVideo_' + object.question.id).innerText = timeleft;
 			}
 			timeleft -= 1;
 		}, 1000);
@@ -293,41 +424,45 @@ class MediaRatingQuestion {
 		let object = this;
 		//TO DO: why not used?
 		const timecheck = object.options.timecheck - 1;
-		let moved = false;
 		if (object.checks <= object.options.warningsAmount) {
 			player.on('timeupdate', function () {
 				const second = Math.floor(player.currentTime());
-				if (sliderObj.getSliderValue() != sliderObj.sliderSettings.customScale.start) { // object.options.scaleStart) {
-					moved = true;
+				const currentValue = sliderObj.getSliderValue() === null ? '' : sliderObj.getSliderValue();
+				if (currentValue !== object.options.sliderSettings.customScale.start.toString()) {
+					object.sliderMoved = true;
 				}
-				if (object.checks <= object.options.warningsAmount && second === parseInt(object.options.timecheck) && !moved) {
+				if (object.checks <= object.options.warningsAmount && second === parseInt(object.options.timecheck) && !object.sliderMoved) {
 					//restart video
 					player.pause();
 					sliderObj.container.classList.add("disabled");
-					$('#startVideo_' + object.question.id).html(object.options.playButtonText[object.currentLanguage]);
-					$('#popup-content').html('' +
+					document.querySelector('#startVideo_' + object.question.id).innerHTML = object.options.playButtonText[object.currentLanguage];
+					document.querySelector('#popup-content').innerHTML = '' +
 						'<p>' + object.options.warningReset[object.currentLanguage] + '</p>' +
-						'<button type="button" id="restartVideo_' + object.question.id + '" style="background: ' + object.options.playButtonColor + ';">' + object.options.resetBtnText[object.currentLanguage] + '</button>');
-					$('#popup').removeClass('hide');
-					$('body').css('overflow', 'hidden');
+						'<button type="button" id="restartVideo_' + object.question.id + '" style="background: ' + object.options.playButtonColor + ';">' + object.options.resetBtnText[object.currentLanguage] + '</button>';
+					document.querySelector('#popup').classList.remove('hide');
+					document.querySelector('body').style.overflow = 'hidden';
 				}
 			});
-			if (!moved) {
+			if (!object.sliderMoved) {
 				object.checks++;
 			}
 		}
 
-		$('body').on('click', '#restartVideo_' + object.question.id, function () {
+		document.querySelector('body').addEventListener('click', function (e) {
+			let restartButton = document.querySelector('#restartVideo_' + object.question.id);
+			if(e.target !== restartButton) {
+				return;
+			}
 			object.closePopup();
-			$('#startVideo_' + object.question.id).html(object.options.playButtonText[object.currentLanguage]);
+			document.querySelector('#startVideo_' + object.question.id).innerHTML = object.options.playButtonText[object.currentLanguage];
 			object.generateSparklines(object.videoDuration);
 			object.restartVideo(player, sliderObj);
 		});
 	}
 
 	closePopup() {
-		$('#popup').addClass('hide');
-		$('body').css('overflow', 'auto');
+		document.querySelector('#popup').classList.add('hide');
+		document.querySelector('body').style.overflow = 'auto';
 	}
 
 	//restart video
@@ -338,50 +473,47 @@ class MediaRatingQuestion {
 
 	//get evaluation values every second of the media
 	collectData(player, videoLength, sliderObj) {
-		let videoAsnwers = [];
+		let videoAnswers = [];
 		if(this.question.value) {
-			videoAsnwers = this.question.value.split("|")[1].split(",");
+			videoAnswers = this.question.value.split("|")[1].split(",");
 		}
 		let object = this;
 		player.on('timeupdate', function () {
 			const second = Math.floor(player.currentTime());
 			if (second >= 1) {
-				videoAsnwers[second - 1] = sliderObj.getSliderValue();
+				videoAnswers[second - 1] = sliderObj.getSliderValue() ?? '-';
 				const val = sliderObj.getSliderValue();
-				if(val > 0) {
-					const pc = (val / object.options.scaleMax) * 10;
-					$("#spark-" + (second - 1)).css({
-						"height":pc+"px",
-						"margin-bottom":"10px",
-						"background-color":"green"
-					});
-				} else if (val < 0){
-						const pc = (val / object.options.scaleMin) * 10;
-						$("#spark-" + (second - 1)).css({
-							"height": pc + "px",
-							"margin-bottom": (10 - pc) + "px",
-							"background-color": "red"
-						});
-				} else {
-						$("#spark-" + (second - 1)).css({
-							"height": "2px",
-							"margin-bottom": "9px",
-							"background-color": "grey"
-						});
+				let spark = document.querySelector("#spark-" + (second - 1));
+				if(!!spark) {
+					if(val > 0) {
+						const pc = (val / object.options.sliderSettings.customScale.max) * 10;
+						spark.style.height = pc+"px";
+						spark.style.marginBottom = "10px";
+						spark.style.backgroundColor = "green";
+					} else if (val < 0){
+						const pc = (val / object.options.sliderSettings.customScale.min) * 10;
+						spark.style.height = pc + "px";
+						spark.style.marginBottom = (10 - pc) + "px";
+						spark.style.backgroundColor = "red";
+					} else {
+						spark.style.height = "2px";
+						spark.style.marginBottom = "9px";
+						spark.style.backgroundColor = "grey";
+					}
 				}
 			}
-			$('#timeRemain').html(object.setCounterMinutesDisplay(second));
+			document.querySelector('#timeRemain').innerHTML = object.setCounterMinutesDisplay(second);
 		});
 
 		player.on('ended', () => {
-			$('.cf-navigation-next').attr('disabled', false);
-			const data = object.checks + "|" + videoAsnwers;
+			document.querySelector('.cf-navigation-next').removeAttribute('disabled');
+			const data = object.checks + "|" + videoAnswers;
 			object.setQuestionValue(data, object);
 		});
 
 		object.question.validationCompleteEvent.on(
 			() => {
-				const data = object.checks + "|" + videoAsnwers;
+				const data = object.checks + "|" + videoAnswers;
 				object.setQuestionValue(data, object);
 			}
 		);
@@ -401,38 +533,6 @@ class MediaRatingQuestion {
 					obj.question.setValue(value);
 			}
 		);
-	}
-		
-	isOverflow(labels, curVisible) {
-		let isOverflow = false;
-		for (let i = 0; i < labels.length - curVisible; i++) {
-			if (labels[i].scrollWidth + labels[i].offsetLeft > labels[i + curVisible].offsetLeft) {
-				isOverflow = true;
-			} 
-		}
-		
-		return isOverflow;
-	}
-			
-	hideLabels(labels, cur) {
-		for (let i = 0; i < labels.length; i++) {
-			if (i == 0 || i == labels.length - 1 ) {
-				labels[i].classList.add('visible');
-				continue;
-			}
-			
-			if (i % cur != 0) {
-				labels[i].classList.remove('visible');
-				labels[i].classList.add('hidden');
-			} else {
-				labels[i].classList.remove('hidden');
-				labels[i].classList.add('visible');
-			}
-		}
-	}
-			
-	onSliderChange() {
-		document.querySelector('.cf-slider__handle').innerHTML = '<span>' + (this.getSliderValue() ? this.getSliderValue()	: '') +  '<span>';
 	}
 }
 
