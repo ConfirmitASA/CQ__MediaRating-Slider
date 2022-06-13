@@ -1,6 +1,15 @@
 {
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "parcel design/index.html runtime/component.js runtime/styles.css lib/slider/styles.css --https --port 1234",
+    "start:webpack": "webpack serve --https --mode development",
+    "build:dist": "npm run build:design && npm run build:runtime && npm run build:copy-static",
+    "build:design": "parcel build design/index.html -d dist/design --no-source-maps --public-url ./",
+    "build:runtime": "parcel build runtime/component.js -d dist/runtime --no-source-maps",
+    "build:copy-static": "copyfiles metadata.json design/icon-dev.svg runtime/styles.css runtime/video-js.min.css runtime/jquery-ui.min.css lib/slider/styles.css dist/",
+    "zip": "tar.exe -caf MediaRatingWithSlider.zip metadata.json runtime design lib",
+    "build-zip": "npm run build && npm run zip"
   },
   "keywords": [],
   "author": "",
@@ -11,8 +20,10 @@
     "@babel/runtime": "^7.11.2",
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^6.0.3",
+    "copyfiles": "^2.4.1",
     "html-webpack-plugin": "^4.3.0",
-    "webpack": "^4.46.0",
+    "parcel-bundler": "^1.12.4",
+    "webpack": "^5.72.1",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.2"
   },
