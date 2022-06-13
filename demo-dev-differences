@@ -10,3 +10,9 @@ name: Media Rating (DEV)
 description: Development version - Media (video or audio) rating while it broadcast.
 icon: icon-dev.svg
 
+old (MR v1 separate CQ, exists on some of the servers on company level: AU, EURO)
+id: acda1ec7-b316-4fe8-b229-d50b17dd7ff36
+name: Media Rating (OLD)
+description: Media (video or audio) rating while it broadcast
+icon: icon.svg
+
