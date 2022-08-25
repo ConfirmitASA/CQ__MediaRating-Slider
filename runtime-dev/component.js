@@ -280,7 +280,7 @@ class MediaRatingQuestion {
 		let sliderContainer = this.sliderContainerNode;
 
 		if (this.options.sliderPosition === 'left' || this.options.sliderPosition === 'right') {
-			this.options.sliderSettings.direction = SLIDER_DIRECTION.vertical;
+			this.options.sliderSettings.direction = this.options.revertSliderMarksOrder ?  SLIDER_DIRECTION.verticalBtt : SLIDER_DIRECTION.vertical;
 			const videoTop = this.videoNode.getBoundingClientRect().top;
 			const videoSliderContainerTop = this.videoSliderContainerNode.getBoundingClientRect().top;
 			sliderContainer.style.marginTop = videoTop - videoSliderContainerTop - this.handleNoValueOffset + 'px';

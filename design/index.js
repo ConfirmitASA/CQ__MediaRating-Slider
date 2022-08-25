@@ -67,6 +67,7 @@ let inputMediaWidth = document.getElementById('mediaWidth');
 let inputMediaSrc = document.getElementById('mediaSrc');
 let inputMediaPoster = document.getElementById('mediaPoster');
 let selectSliderPosition = document.getElementById('sliderPosition');
+let revertSliderMarksOrder = document.getElementById('revertSliderMarksOrder');
 let inputScaleMax = document.getElementById('scaleMax');
 let inputScaleMin = document.getElementById('scaleMin');
 let inputScaleStart = document.getElementById('scaleStart');
@@ -147,6 +148,9 @@ function setInputValue(settings, uiSettings) {
 		inputMediaPoster.value = settings.poster;
 		selectSliderPosition.value = settings.sliderPosition;
 
+		revertSliderMarksOrder.parentElement.classList.toggle('hidden', settings.sliderPosition === 'bottom');
+		revertSliderMarksOrder.checked = settings.revertSliderMarksOrder;
+
 		if(settings.hasOwnProperty('playButtonText') && settings.playButtonText[currentLanguage] !== undefined) {
 				inputPlayButtonText.value = settings.playButtonText[currentLanguage];
 		} else {
@@ -175,6 +179,7 @@ function setInputValue(settings, uiSettings) {
 				inputWarningIOS.value = '';
 		}
 	}
+
 	openPanelsWithErrors();
 	updateErrorsAndWarnings();
 }
@@ -211,6 +216,7 @@ function saveNewChanges() {
 		src: inputMediaSrc.value,
 		poster: inputMediaPoster.value,
 		sliderPosition: selectSliderPosition.value,
+		revertSliderMarksOrder: revertSliderMarksOrder.checked,
 		playButtonColor: inputPlayButtonColor.value,
 		playButtonTextColor: inputPlayButtonTextColor.value,
 		playButtonText: playButtonTextObj,
@@ -534,6 +540,9 @@ function removeWarnings() {
 }
 
 customQuestion.onSettingsReceived = setInputValue;
+
+revertSliderMarksOrder.addEventListener('change', ()=> saveNewChanges());
+
 document.getElementById('customSettings').addEventListener('input', function () {
 		saveNewChanges();
 });
